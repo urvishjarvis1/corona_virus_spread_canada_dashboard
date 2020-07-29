@@ -1,0 +1,52 @@
+[
+ {
+   "region": 1,
+   "regioncount": 577,
+   "recoveredcount": 1
+ },
+ {
+   "region": 1,
+   "regioncount": 32,
+   "recoveredcount": 2
+ },
+ {
+   "region": 2,
+   "regioncount": 6534,
+   "recoveredcount": 1
+ },
+ {
+   "region": 2,
+   "regioncount": 1957,
+   "recoveredcount": 2
+ },
+ {
+   "region": 3,
+   "regioncount": 7075,
+   "recoveredcount": 1
+ },
+ {
+   "region": 3,
+   "regioncount": 1028,
+   "recoveredcount": 2
+ },
+ {
+   "region": 4,
+   "regioncount": 3143,
+   "recoveredcount": 1
+ },
+ {
+   "region": 4,
+   "regioncount": 63,
+   "recoveredcount": 2
+ },
+ {
+   "region": 5,
+   "regioncount": 985,
+   "recoveredcount": 1
+ },
+ {
+   "region": 5,
+   "regioncount": 71,
+   "recoveredcount": 2
+ }
+]
