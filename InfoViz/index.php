@@ -42,6 +42,7 @@
 
   body {
     font: 10px sans-serif;
+    background-color: #dbd9d3;
   }
 
   .axis path,
@@ -102,12 +103,12 @@
 
     <div class="row">
       <div class="col-sm-4">
-        <p>Some text..</p>
+         
         <div id="map" class="img-responsive" style="width:100%;height: 50%">
           <svg viewBox="0 0 500 350"></svg>
           <script src="https://unpkg.com/d3@5.9.2/dist/d3.min.js"></script>
           <script src="https://unpkg.com/topojson@3.0.2/dist/topojson.min.js"></script>
-
+          <script src="color.js"></script>
           <script>
             d3map = d3
             window.d3 = null
@@ -127,6 +128,7 @@
             var RegionID = 0;
             var color = null;
             var RegionCount = [0, 0, 0, 0, 0, 0];
+            var RegionName = [];
             var ActiveCount = [0, 0, 0, 0, 0, 0];
             var RecoverCount = [0, 0, 0, 0, 0, 0];
             var RegionNames = ['', 'Atlantic', 'Quebec', 'Ontario and Nunavut', 'Prairies', 'British Columbia and Yukon'];
@@ -166,17 +168,32 @@
               .attr("text-anchor", "middle")
               .style("font-size", "20px")
             //   .html(titleText);
+            $.ajax({
+              type: "GET",
+              url: "/RestAPI/GetRegion.php",
+
+              success: function(response) {
+                responseData = response.toString();
+                res = $.parseJSON(responseData)
+                RegionName = res["reg"].map(function(d) {
+                  return d.region_name;
+                })
+
+              }
+            });
+
             d3map.json('http://localhost/RestAPI/DataCountAPI.php').then((region) => {
               d3map.json('canada.json').then((data) => {
 
                 region.forEach(function(d, i) {
+
 
                   RegionCount[d.region] += parseInt(d.total_count);
                   ActiveCount[d.region] += parseInt(d.active_count);
                   RecoverCount[d.region] += parseInt(d.recoverd_count);
                 });
                 color = d3map.scaleOrdinal().domain([d3map.min(RegionCount), d3map.max(RegionCount)])
-                  .range(['#fcba03', '#2bd4e0', '#db0d0d', '#27d62c', '#303330'])
+                  .range(['#deebf7', '#9ecae1', '#deebf7', '#3182bd', '#3182bd'])
 
 
                 g.selectAll('path')
@@ -206,7 +223,7 @@
                             return data.RegionID;
                           }
                       })
-                      .style('stroke-width', '1')
+                      .style('stroke-width', '0.5')
                       .style("opacity", 1);
 
                     d3map.selectAll('path')
@@ -217,10 +234,13 @@
                           }
                       })
                       .style('stroke-width', '0.1')
-                      .style("opacity", 0.9);
+                      .style("opacity", 0.5);
 
                     div.html(
                         "<table>" +
+                        "<tr>" +
+                        "<th style=\"font-size:15px\">" + RegionName[d.RegionID - 1] + "</th>" +
+                        "</tr>" +
                         "<tr>" +
                         "<th>Total Cases:</th>" +
                         "<td>" + RegionCount[d.RegionID] + "</td>" +
@@ -238,6 +258,7 @@
                       )
                       .style("left", 10 + "px")
                       .style("top", 120 + "px")
+                      .style("width", 200 + "px")
                       .style("opacity", .9)
 
                   })
@@ -249,9 +270,20 @@
                     div.style("opacity", 0);
 
                   })
-                  .on("click", function(clicked_data) {
+                  .on("click", function(d) {
+                    d3map.selectAll('path').data(data.features).style('stroke-width', '0.1')
 
-                    fetchData(clicked_data.RegionID);
+                    d3map.selectAll('path')
+                      .filter(function(data, i) {
+
+                        if (data != null)
+                          if (data.RegionID == d.RegionID) {
+                            return data.RegionID;
+                          }
+                      })
+                      .style('stroke-width', '1')
+                      .style("opacity", 1);
+                    fetchData(d.RegionID);
                     //fucntion call
                   });
                 //        .on("click", function(clicked_data) {
@@ -275,17 +307,18 @@
                   pushData($.parseJSON(response))
                   pushGenderData(region_id)
                   pushTransData(region_id)
+                  pushHospitalData(region_id)
+                  pushOccupationData(region_id)
+                  console.log(response)
+
                 }
               });
-
-
             }
             //}(d3map, topojson));
           </script>
         </div>
       </div>
       <div class="col-sm-4">
-        <p>Some text..</p>
         <div class="img-responsive" style="width:100%; height:50%" alt="Image">
           <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
           <canvas id="mixed-chart" width="800" height="500"></canvas>
@@ -305,49 +338,7 @@
 
             function pushData(responseData) {
               chart.destroy();
-              label = responseData["jsonarray"].map(function(d) {
-                return d.onsetweekofsym;
-              })
-              datas = responseData["jsonarray"].map(function(d) {
-                return d.count;
-              })
-              lebel_death = responseData["deathdata"].map(function(d) {
-                return d.onsetweekofsym;
-              })
-              death_datas = responseData["deathdata"].map(function(d) {
-                return d.count;
-              })
-
-              var ctx = document.getElementById("mixed-chart")
-              var config = {
-                type: 'bar',
-                data: {
-                  labels: label,
-                  datasets: [{
-                    label: "Onset week of Symptoms",
-                    type: "line",
-                    borderColor: "#8e5ea2",
-                    data: datas,
-                    fill: true
-                  }, {
-                    label: "Death ",
-                    type: "line",
-                    borderColor: "#3e95cd",
-                    data: death_datas,
-                    fill: true
-                  }]
-                },
-                options: {
-                  title: {
-                    display: true,
-                    text: 'Corona Virus spread infected and death'
-                  },
-                  legend: {
-                    display: false
-                  }
-                }
-              }
-              chart = new Chart(ctx, config);
+              loadData(responseData)
             }
 
             function loadData(responseData) {
@@ -375,13 +366,13 @@
                     type: "line",
                     borderColor: "#8e5ea2",
                     data: datas,
-                    fill: true
+                    fill: false
                   }, {
                     label: "Death ",
                     type: "line",
                     borderColor: "#3e95cd",
                     data: death_datas,
-                    fill: true
+                    fill: false
                   }]
                 },
                 options: {
@@ -390,7 +381,7 @@
                     text: 'Corona Virus spread infected and death'
                   },
                   legend: {
-                    display: false
+                    display: true
                   }
                 }
               }
@@ -401,7 +392,7 @@
       </div>
 
       <div class="col-sm-4">
-        <p>Some text..</p>
+         
         <div class="img-responsive" style="width:100% height=50%" alt="Image">
           <canvas id="bar-chart-grouped" width="800" height="500"></canvas>
           <script>
@@ -417,10 +408,11 @@
                 }
               });
             })
-            function pushGenderData(region_id){
+
+            function pushGenderData(region_id) {
               $.ajax({
                 type: "GET",
-                url: "/RestAPI/GenderData.php?regionid="+region_id,
+                url: "/RestAPI/GenderData.php?regionid=" + region_id,
                 datatype: "json",
                 success: function(response) {
                   isdefined = false
@@ -429,111 +421,63 @@
                 }
               });
             }
-            function pushGenderDataGraph(responseData){
-              chartGender.destroy();
-              label = responseData["male"].map(function(d) {
-                if(d.agegroup==1){
-                  return "0-19";
-                }else if(d.agegroup==2){
-                  return "20-29";
-                }else if(d.agegroup==3){
-                  return "30-39";
-                }else if(d.agegroup==4){
-                  return "40-49";
-                }else if(d.agegroup==5){
-                  return "50-59";
-                }else if(d.agegroup==6){
-                  return "60-69";
-                }else if(d.agegroup==7){
-                  return "70-79"
-                }else if(d.agegroup==8){
-                  return "80-";
-                }
-              })
-              datas = responseData["male"].map(function(d) {
-                return d.male_count;
-              })
-              
-              death_datas = responseData["female"].map(function(d) {
-                return d.female_count;
-              })
-              var ctxgender = document.getElementById("bar-chart-grouped")
-              var configgender = {
-              type: 'bar',
-              data: {
-                labels: label,
-                datasets: [{
-                  label: "Male",
-                  backgroundColor: "#3e95cd",
-                  data: datas
-                }, {
-                  label: "Female",
-                  backgroundColor: "#8e5ea2",
-                  data: death_datas
-                }]
-              },
-              options: {
-                title: {
-                  display: true,
-                  text: 'Corona Spread gender & age wise'
-                }
-              }
-            }
-            chartGender=new Chart(ctxgender,configgender );
-          }
 
-            function loadGenderData(responseData){
+            function pushGenderDataGraph(responseData) {
+              chartGender.destroy();
+              loadGenderData(responseData)
+            }
+
+            function loadGenderData(responseData) {
               label = responseData["male"].map(function(d) {
-                if(d.agegroup==1){
+                if (d.agegroup == 1) {
                   return "0-19";
-                }else if(d.agegroup==2){
+                } else if (d.agegroup == 2) {
                   return "20-29";
-                }else if(d.agegroup==3){
+                } else if (d.agegroup == 3) {
                   return "30-39";
-                }else if(d.agegroup==4){
+                } else if (d.agegroup == 4) {
                   return "40-49";
-                }else if(d.agegroup==5){
+                } else if (d.agegroup == 5) {
                   return "50-59";
-                }else if(d.agegroup==6){
+                } else if (d.agegroup == 6) {
                   return "60-69";
-                }else if(d.agegroup==7){
+                } else if (d.agegroup == 7) {
                   return "70-79"
-                }else if(d.agegroup==8){
+                } else if (d.agegroup == 8) {
                   return "80-";
                 }
               })
               datas = responseData["male"].map(function(d) {
                 return d.male_count;
               })
-              
+
               death_datas = responseData["female"].map(function(d) {
                 return d.female_count;
               })
               var ctxgender = document.getElementById("bar-chart-grouped")
               var configgender = {
-              type: 'bar',
-              data: {
-                labels: label,
-                datasets: [{
-                  label: "Male",
-                  backgroundColor: "#3e95cd",
-                  data: datas
-                }, {
-                  label: "Female",
-                  backgroundColor: "#8e5ea2",
-                  data: death_datas
-                }]
-              },
-              options: {
-                title: {
-                  display: true,
-                  text: 'Corona Spread gender & age wise'
+                type: 'bar',
+                data: {
+                  labels: label,
+                  datasets: [{
+                    label: "Male",
+                    backgroundColor: "#3e95cd",
+                    data: datas
+                  }, {
+                    label: "Female",
+                    backgroundColor: "#8e5ea2",
+                    data: death_datas
+                  }]
+                },
+                options: {
+                  title: {
+                    display: true,
+                    text: 'Corona Spread gender & age wise'
+                  }
                 }
               }
+              chartGender = new Chart(ctxgender, configgender);
             }
-            chartGender=new Chart(ctxgender,configgender );
-          }
-            
           </script>
 
 
@@ -542,10 +486,9 @@
     </div>
     <div class="row">
       <div class="col-sm-4">
-        <p>Some text..</p>
         <div id="" class="img-responsive" style="width:100% height=50%" alt="Image">
           <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
-          <canvas id="bar-chart2" height="130"></canvas>
+          <canvas id="bar-chart2" height="160"></canvas>
           <script type="text/javascript">
             $(document).ready(function() {
               $.ajax({
@@ -558,10 +501,11 @@
                 }
               });
             })
-            function pushTransData(region_id){
+
+            function pushTransData(region_id) {
               $.ajax({
                 type: "GET",
-                url: "/RestAPI/GetTransmissionData.php?regionid="+region_id,
+                url: "/RestAPI/GetTransmissionData.php?regionid=" + region_id,
                 datatype: "json",
                 success: function(response) {
                   isdefined = false
@@ -569,390 +513,206 @@
                 }
               });
             }
-            function pushDataToGraph(responseData){
+
+            function pushDataToGraph(responseData) {
               transChart.destroy();
-              var datas=[];
-              dataTransmission1=responseData.transmission_count;
-              dataTransmission2=responseData.transmission2_count;
-              dataTransmission3=responseData.transmission3_count;
+              loadTransmissionData(responseData)
+            }
+
+            function loadTransmissionData(responseData) {
+              var datas = [];
+              dataTransmission1 = responseData.transmission_count;
+              dataTransmission2 = responseData.transmission2_count;
+              dataTransmission3 = responseData.transmission3_count;
               datas.push(dataTransmission1);
               datas.push(dataTransmission2);
               datas.push(dataTransmission3);
-              var ctx=document.getElementById("bar-chart2");
-              var config={
-              type: 'bar',
-              data: {
-                labels: ["Domestic","Internation Travel","Unknown"],
-                datasets: [{
-                  label: "Transmission",
-                  backgroundColor: ["#3e95cd", "#8e5ea2","#4a1ea2"],
-                  data: datas
-                }]
-              },
-              options: {
-                legend: {
-                  display: false
+              var ctx = document.getElementById("bar-chart2");
+              var config = {
+                type: 'bar',
+                data: {
+                  labels: ["Domestic", "Internation Travel", "Unknown"],
+                  datasets: [{
+                    label: "Transmission",
+                    backgroundColor: ["#8e5ea2", "#8e5ea2", "#8e5ea2"],
+                    data: datas
+                  }]
                 },
-                title: {
-                  display: true,
-                  text: 'Corona Virus Transmission'
+                options: {
+                  legend: {
+                    display: false
+                  },
+                  title: {
+                    display: true,
+                    text: 'Corona Virus Transmission'
+                  }
                 }
               }
+              transChart = new Chart(ctx, config)
             }
-            transChart=new Chart(ctx,config)
-            }
-            function loadTransmissionData(responseData){
-              var datas=[];
-              dataTransmission1=responseData.transmission_count;
-              dataTransmission2=responseData.transmission2_count;
-              dataTransmission3=responseData.transmission3_count;
-              datas.push(dataTransmission1);
-              datas.push(dataTransmission2);
-              datas.push(dataTransmission3);
-              var ctx=document.getElementById("bar-chart2");
-              var config={
-              type: 'bar',
-              data: {
-                labels: ["Domestic","Internation Travel","Unknown"],
-                datasets: [{
-                  label: "Transmission",
-                  backgroundColor: ["#3e95cd", "#8e5ea2","#8e2ea2"],
-                  data: datas
-                }]
-              },
-              options: {
-                legend: {
-                  display: false
-                },
-                title: {
-                  display: true,
-                  text: 'Corona Virus Transmission'
-                }
-              }
-            }
-            transChart=new Chart(ctx,config)
-            }
-            
           </script>
         </div>
       </div>
       <div class="col-sm-4">
-        <p>Some text..</p>
+
         <div id="hospital" class="img-responsive" style="width:100% height=100%" alt="Image">
-          <script data-require="d3@3.5.3" data-semver="3.5.3" src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.js"></script>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+          <canvas id="mixed-chart2" width="800" height="430" style="margin-left: 300"></canvas>
           <script>
-            d3hos = d3
-            window.d3 = null
-            const title = "Atlantic"
-            var myData = "date,Hospitalized,ICU,Not Hospitalized\n\
-20200217,2,0,42\n\
-20200224,35,3,107\n\
-20200302,59,57,744\n\
-20200309,950,101,1265\n\
-20200316,234,93,2110\n\
-20200323,292,103,2296\n\
-20200330,302,69,3098\n\
-20200406,369,72,3999\n\
-20200413,373,71,3334\n\
-20200420,357,43,3168\n\
-20200427,212,43,2533\n\
-20200504,220,43,2596\n\
-20200511,141,32,2166\n\
-20200518,100,18,1723\n\
-20200525,33,1,963\n";
+            $(document).ready(function() {
+              $.ajax({
+                type: "GET",
+                url: "/RestAPI/GetHospitalData.php?regionid=1",
+                datatype: "json",
+                success: function(response) {
+                  isdefined = false
 
-            var margin = {
-                top: 20,
-                right: 100,
-                bottom: 30,
-                left: 10
-              },
-              width2 = 510 - margin.left - margin.right,
-              height2 = 200 - margin.top - margin.bottom;
-
-            var parseDate = d3hos.time.format("%Y%m%d").parse;
+                  loadHospitalData($.parseJSON(response))
 
 
-            var x = d3hos.time.scale()
-              .range([0, width2]);
-
-            var y = d3hos.scale.linear()
-              .range([height2, 0]);
-
-            var color = d3hos.scale.category10();
-
-            var xAxis = d3hos.svg.axis()
-              .scale(x)
-              .orient("bottom");
-
-            var yAxis = d3hos.svg.axis()
-              .scale(y)
-              .orient("left");
-
-            var line = d3hos.svg.line()
-              .interpolate("basis")
-              .x(function(d) {
-                return x(d.date);
-              })
-              .y(function(d) {
-                return y(d.count);
+                }
               });
+            })
 
-            var svg2 = d3hos.select("#hospital").append("svg")
-              .attr("width", width2 + margin.left + margin.right)
-              .attr("height", height2 + margin.top + margin.bottom)
-              .append("g")
-              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            function pushHospitalData(region_id) {
 
-            //  var data1=  d3hos.csv("data.csv", function(data) {
-            //    for (var i = 0; i < data.length; i++) {
-            //        data[i].date= data[i].date.time.format("%Y%m%d").parse;
-            //          console.log(data);
-            //console.log(data[i].Totalcases);
-            //      }
-            //      });
-            var data2 = d3hos.csv.parse(myData);
+              $.ajax({
+                type: "GET",
+                url: "/RestAPI/GetHospitalData.php?regionid=" + region_id,
+                datatype: "json",
+                success: function(response) {
+                  isdefined = false
+                  pushHospitalDataToGraph($.parseJSON(response))
 
-
-            color.domain(d3hos.keys(data2[0]).filter(function(key) {
-              return key !== "date";
-            }));
-
-            data2.forEach(function(d) {
-              d.date = parseDate(d.date);
-            });
-
-            var patients = color.domain().map(function(name) {
-              return {
-                name: name,
-                values: data2.map(function(d) {
-                  return {
-                    date: d.date,
-                    count: +d[name]
-                  };
-                })
-              };
-            });
-
-            x.domain(d3hos.extent(data2, function(d) {
-              return d.date;
-            }));
-
-            y.domain([
-              d3hos.min(patients, function(c) {
-                return d3hos.min(c.values, function(v) {
-                  return v.count;
-                });
-              }),
-              d3hos.max(patients, function(c) {
-                return d3hos.max(c.values, function(v) {
-                  return v.count;
-                });
-              })
-            ]);
-
-            var legend = svg2.selectAll('g')
-              .data(patients)
-              .enter()
-              .append('g')
-              //  .html(titleText)
-              .attr('class', 'legend');
-
-            legend.append('rect')
-              .attr('x', width2 - 20)
-              .attr('y', function(d, i) {
-                return i * 20;
-              })
-              .attr('width', 10)
-              .attr('height', 10)
-              .style('fill', function(d) {
-                return color(d.name);
+                }
               });
+            }
 
-            legend.append('text')
-              .attr('x', width2 - 8)
-              .attr('y', function(d, i) {
-                return (i * 20) + 9;
+
+            function pushHospitalDataToGraph(responseData) {
+              hospitalChart.destroy();
+              loadHospitalData(responseData)
+            }
+
+            function loadHospitalData(responseData) {
+              label = responseData["icu"].map(function(d) {
+                return d.onsetweekofsym;
               })
-              .text(function(d) {
-                return d.name;
-              });
-
-            svg2.append("g")
-              .attr("class", "x axis")
-              .attr("transform", "translate(0," + height2 + ")")
-              .call(xAxis);
-
-            svg2.append("g")
-              .attr("class", "y axis")
-              .call(yAxis)
-              .append("text")
-              .attr("transform", "rotate(-90)")
-              .attr("y", 6)
-              .attr("dy", ".71em")
-              .style("text-anchor", "end")
-              .text("count");
-
-            var patient = svg2.selectAll(".patient")
-              .data(patients)
-              .enter().append("g")
-              .attr("class", "patient");
-
-            patient.append("path")
-              .attr("class", "line")
-              .attr("d", function(d) {
-                return line(d.values);
+              datas = responseData["icu"].map(function(d) {
+                return d.count;
               })
-              .style("stroke", function(d) {
-                return color(d.name);
-              });
 
-            patient.append("text")
-              .datum(function(d) {
-                return {
-                  value: d.values[d.values.length - 1]
-                };
+              hospital_datas = responseData["hospital"].map(function(d) {
+                return d.count;
               })
-              .attr("transform", function(d) {
-                return "translate(" + x(d.value.date) + "," + y(d.value.count) + ")";
+              notHospital_datas = responseData["nothospital"].map(function(d) {
+                return d.count;
               })
-              .attr("x", 3)
-              .attr("dy", ".35em")
-              .text(function(d) {
-                return d.name;
-              });
 
-            var mouseG = svg2.append("g")
-              .attr("class", "mouse-over-effects");
-
-            mouseG.append("path") // this is the black vertical line to follow mouse
-              .attr("class", "mouse-line")
-              .style("stroke", "white")
-              .style("stroke-width", "1px")
-              .style("opacity", "0");
-
-            var lines = document.getElementsByClassName('line');
-
-            var mousePerLine = mouseG.selectAll('.mouse-per-line')
-              .data(patients)
-              .enter()
-              .append("g")
-              .attr("class", "mouse-per-line");
-
-            mousePerLine.append("circle")
-              .attr("r", 7)
-              .style("stroke", function(d) {
-                return color(d.name);
-              })
-              .style("fill", "none")
-              .style("stroke-width", "1px")
-              .style("opacity", "0");
-
-            mousePerLine.append("text")
-              .attr("transform", "translate(10,3)");
-
-            mouseG.append('svg:rect') // append a rect to catch mouse movements on canvas
-              .attr('width', width2) // can't catch mouse events on a g element
-              .attr('height', height2)
-              .attr('fill', 'none')
-              .attr('pointer-events', 'all')
-              .on('mouseout', function() { // on mouse out hide line, circles and text
-                d3hos.select(".mouse-line")
-                  .style("opacity", "0");
-                d3hos.selectAll(".mouse-per-line circle")
-                  .style("opacity", "0");
-                d3hos.selectAll(".mouse-per-line text")
-                  .style("opacity", "0");
-              })
-              .on('mouseover', function() { // on mouse in show line, circles and text
-                d3hos.select(".mouse-line")
-                  .style("opacity", "1");
-                d3hos.selectAll(".mouse-per-line circle")
-                  .style("opacity", "1");
-                d3hos.selectAll(".mouse-per-line text")
-                  .style("opacity", "1");
-              })
-              .on('mousemove', function() { // mouse moving over canvas
-                var mouse = d3hos.mouse(this);
-                d3hos.select(".mouse-line")
-                  .attr("d", function() {
-                    var d = "M" + mouse[0] + "," + height2;
-                    d += " " + mouse[0] + "," + 0;
-                    return d;
-                  });
-
-                d3hos.selectAll(".mouse-per-line")
-                  .attr("transform", function(d, i) {
-                    //  console.log(width/mouse[0])
-                    var xDate = x.invert(mouse[0]),
-                      bisect = d3hos.bisector(function(d) {
-                        return d.date;
-                      }).right;
-                    idx = bisect(d.values, xDate);
-                    //console.log(idx)
-
-                    var beginning = 0,
-                      end = lines[i].getTotalLength(),
-                      target = null;
-
-                    while (true) {
-                      target = Math.floor((beginning + end) / 2);
-                      //    console.log(target)
-                      pos = lines[i].getPointAtLength(target);
-                      if ((target === end || target === beginning) && pos.x !== mouse[0]) {
-                        break;
-                      }
-                      if (pos.x > mouse[0]) end = target;
-                      else if (pos.x < mouse[0]) beginning = target;
-                      else break; //position found
-                    }
-
-                    d3hos.select(this).select('text')
-                      .text(y.invert(pos.y).toFixed(0));
-
-                    return "translate(" + mouse[0] + "," + pos.y + ")";
-                  });
-              });
+              var ctx = document.getElementById("mixed-chart2")
+              var config = {
+                type: 'bar',
+                data: {
+                  labels: label,
+                  datasets: [{
+                    label: "ICU",
+                    type: "line",
+                    borderColor: "#8e5ea2",
+                    data: datas,
+                    fill: false
+                  }, {
+                    label: "Hospitalized ",
+                    type: "line",
+                    borderColor: "#3e95cd",
+                    data: hospital_datas,
+                    fill: false
+                  }, {
+                    label: "Not Hospitalized ",
+                    type: "line",
+                    borderColor: "#3e12cd",
+                    data: notHospital_datas,
+                    fill: false
+                  }],
+                },
+                options: {
+                  title: {
+                    display: true,
+                    text: 'Corona Virus spread infected and death'
+                  },
+                  legend: {
+                    display: true
+                  }
+                }
+              }
+              hospitalChart = new Chart(ctx, config);
+            }
           </script>
-
         </div>
       </div>
       <div class="col-sm-4">
-        <p>Some text..</p>
+         
         <div id="" class="img-responsive" style="width:100% height=100%" alt="Image">
           <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
-          <canvas id="radar-chart" width="800" height="350"></canvas>
+          <canvas id="bar-chart-horizontal" width="800" height="390"></canvas>
           <script>
-            new Chart(document.getElementById("radar-chart"), {
-              type: 'radar',
-              data: {
-                labels: ["Africa", "Asia", "Europe", "Latin America", "North America"],
-                datasets: [{
-                  label: "1950",
-                  fill: true,
-                  backgroundColor: "rgba(179,181,198,0.2)",
-                  borderColor: "rgba(179,181,198,1)",
-                  pointBorderColor: "#fff",
-                  pointBackgroundColor: "rgba(179,181,198,1)",
-                  data: [8.77, 55.61, 21.69, 6.62, 6.82]
-                }, {
-                  label: "2050",
-                  fill: true,
-                  backgroundColor: "rgba(255,99,132,0.2)",
-                  borderColor: "rgba(255,99,132,1)",
-                  pointBorderColor: "#fff",
-                  pointBackgroundColor: "rgba(255,99,132,1)",
-                  pointBorderColor: "#fff",
-                  data: [25.48, 54.16, 7.61, 8.06, 4.45]
-                }]
-              },
-              options: {
-                title: {
-                  display: true,
-                  text: 'Distribution in % of world population'
+            $(document).ready(function() {
+              $.ajax({
+                type: "GET",
+                url: "/RestAPI/GetOccupation.php?regionid=1",
+                datatype: "json",
+                success: function(response) {
+                  isdefined = false
+                  loadOccupation($.parseJSON(response))
+                }
+              });
+            })
+
+            function pushOccupationData(region_id) {
+              $.ajax({
+                type: "GET",
+                url: "/RestAPI/GetOccupation.php?regionid=" + region_id,
+                datatype: "json",
+                success: function(response) {
+                  isdefined = false
+                  pushOccupationDataToGraph($.parseJSON(response))
+                }
+              });
+            }
+
+            function pushOccupationDataToGraph(response) {
+              chartOccupation.destroy()
+              loadOccupation(response)
+            }
+
+            function loadOccupation(responseData) {
+              dataOccupation = []
+              dataOccupation.push(responseData.healthcare_count)
+              dataOccupation.push(responseData.schoolworker_count)
+              dataOccupation.push(responseData.care_count)
+              dataOccupation.push(responseData.other_count)
+              var ctx = document.getElementById("bar-chart-horizontal")
+              var config = {
+                type: 'horizontalBar',
+                data: {
+                  labels: ["Health care worker", "School/daycare worker", "Longterm care resident", "Other"],
+                  datasets: [{
+                    label: "Population",
+                    backgroundColor: ["#3e95cd", "#3e95cd", "#3e95cd", "#3e95cd", "#3e95cd"],
+                    data: dataOccupation
+                  }]
+                },
+                options: {
+                  legend: {
+                    display: false
+                  },
+                  title: {
+                    display: true,
+                    text: 'Occupation of Patients '
+                  }
                 }
               }
-            });
+              chartOccupation = new Chart(ctx, config)
+            }
           </script>
         </div>
       </div>
