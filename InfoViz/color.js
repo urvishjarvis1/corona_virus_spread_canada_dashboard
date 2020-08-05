@@ -34,8 +34,8 @@
     const svg = d3.select('svg');
 
     const cScale = d3.scaleOrdinal()
-        .domain(['<3000', '<6000', '<9000'])
-        .range(['#deebf7', '#9ecae1', '#3182bd']);
+        .domain(['0-3000', '3000-6000', '6000-9000'])
+        .range(['#bdd7e7', '#6baed6', '#2171b5']);
 
     svg.append('g')
         .attr('transform', `translate(10,250)`)
