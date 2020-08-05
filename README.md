@@ -9,6 +9,7 @@ Install [xampp](https://www.apachefriends.org/download.html) software.
 - Install Python
 - Start apache and mysql server on the xampp dashboard.
 - open localhost/phpmyadmin in browser, and create coronavirusvisualization database.
+- download dataset from https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1310078101
 - Goto dataset directory and run sqlconnection.py
 - Open localhost/phpmyadmin to see the table creation.
 - Goto dataset directory and run csvreader.py
