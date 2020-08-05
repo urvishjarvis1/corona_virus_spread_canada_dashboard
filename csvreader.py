@@ -62,17 +62,18 @@ with open('C:/Users/urvis/OneDrive/Documents/University Of Regina/Term 2/Informa
             print("region:",region,"episodeweek",episodeweek,"gender",gender,"agegroup", agegroup,"occupation",occupation,"asymptomatic",asymptomatic,"onsetweekofsym",onsetweekofsym,"onsetyearofsym",onsetyearofsym,"hospitalstatus",hospitalstatus,"recovered",recovered,"recoveryweek",recoveryweek,"recoveryyear",recoveryyear,"transmission",transmission)
 
             if region == 1:
-                insertquery=""" UPDATE atlantic SET death = %s where case_id=%s"""
+                insertquery=""" INSERT INTO atlantic VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
             elif region == 2:
-                insertquery=""" UPDATE quebec SET death = %s where case_id=%s"""
+                insertquery=""" INSERT INTO quebec VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
             elif region == 3:
-                insertquery=""" UPDATE ontario SET death = %s where case_id=%s"""
+                insertquery=""" INSERT INTO ontario VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
             elif region == 4:
-                insertquery=""" UPDATE prairies SET death = %s where case_id=%s"""
+                insertquery=""" INSERT INTO prairies VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
             elif region == 5:
-                insertquery=""" UPDATE britishcolumbia SET death = %s where case_id=%s"""
+                insertquery=""" INSERT INTO britishcolumbia VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
             previousid=int(previousId)
-            recordtuple=(death,previousid)
+            previousid=int(previousId)
+            recordtuple=(previousid,episodeweek,episodeyear,gender,agegroup,occupation,asymptomatic,onsetweekofsym,onsetyearofsym,hospitalstatus,recovered,recoveryweek,recoveryyear,death,transmission,region)
             cursor.execute(insertquery,recordtuple)
             connection.commit()
             if row[4] == 'Region':
