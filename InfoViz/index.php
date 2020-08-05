@@ -36,13 +36,13 @@
 
   /* Add a gray background color and some padding to the footer */
   footer {
-    background-color: #f2f2f2;
+    background-color: #ffffff;
     padding: 25px;
   }
 
   body {
     font: 10px sans-serif;
-    background-color: #dbd9d3;
+    background-color: #ffffff;
   }
 
   .axis path,
@@ -91,7 +91,7 @@
           <p id="activecase" style="font-size: 30px;color: red"></p>
         </div>
         <div class="col-sm-4">
-          <p style="font-size:20px"> recovered Cases</p>
+          <p style="font-size:20px"> Recovered Cases</p>
           <p id="recoveredcase" style="font-size: 35px;color: blue"></p>
         </div>
       </div>
@@ -103,7 +103,7 @@
 
     <div class="row">
       <div class="col-sm-4">
-         
+
         <div id="map" class="img-responsive" style="width:100%;height: 50%">
           <svg viewBox="0 0 500 350"></svg>
           <script src="https://unpkg.com/d3@5.9.2/dist/d3.min.js"></script>
@@ -193,8 +193,7 @@
                   RecoverCount[d.region] += parseInt(d.recoverd_count);
                 });
                 color = d3map.scaleOrdinal().domain([d3map.min(RegionCount), d3map.max(RegionCount)])
-                  .range(['#deebf7', '#9ecae1', '#deebf7', '#3182bd', '#3182bd'])
-
+                  .range(['#bdd7e7', '#6baed6', '#bdd7e7', '#2171b5', '#2171b5'])
 
                 g.selectAll('path')
                   .data(data.features)
@@ -343,8 +342,43 @@
 
             function loadData(responseData) {
 
+    //          label = responseData["jsonarray"].map(function(d) {
+    //            return d.onsetweekofsym;
+    //          })
               label = responseData["jsonarray"].map(function(d) {
-                return d.onsetweekofsym;
+                if (d.onsetweekofsym == 8) {
+                  return "Feb 23";
+                } else if (d.onsetweekofsym == 9) {
+                  return "Mar 01";
+                } else if (d.onsetweekofsym == 10) {
+                  return "Mar 08";
+                } else if (d.onsetweekofsym == 11) {
+                  return "Mar 15";
+                } else if (d.onsetweekofsym == 12) {
+                  return "Mar 22";
+                } else if (d.onsetweekofsym == 13) {
+                  return "Mar 29";
+                } else if (d.onsetweekofsym == 14) {
+                  return "Apr 05"
+                } else if (d.onsetweekofsym == 15) {
+                  return "Apr 12";
+                }else if (d.onsetweekofsym == 16) {
+                  return "Apr 19";
+                }else if (d.onsetweekofsym == 17) {
+                  return "Apr 26";
+                }else if (d.onsetweekofsym == 18) {
+                  return "May 03";
+                }else if (d.onsetweekofsym == 19) {
+                  return "May 10";
+                }else if (d.onsetweekofsym == 20) {
+                  return "May 17";
+                }else if (d.onsetweekofsym == 21) {
+                  return "May 24";
+                }else if (d.onsetweekofsym == 22) {
+                  return "May 31";
+                }else if (d.onsetweekofsym == 99) {
+                  return "Unknown";
+                }
               })
               datas = responseData["jsonarray"].map(function(d) {
                 return d.count;
@@ -357,6 +391,7 @@
               })
 
               var ctx = document.getElementById("mixed-chart")
+            //  Chart.defaults.scale.gridLines.display = true;
               var config = {
                 type: 'bar',
                 data: {
@@ -364,13 +399,13 @@
                   datasets: [{
                     label: "Onset week of Symptoms",
                     type: "line",
-                    borderColor: "#8e5ea2",
+                    borderColor: "#31a354",
                     data: datas,
                     fill: false
                   }, {
-                    label: "Death ",
+                    label: "Dead ",
                     type: "line",
-                    borderColor: "#3e95cd",
+                    borderColor: "#e30f0b",
                     data: death_datas,
                     fill: false
                   }]
@@ -378,10 +413,36 @@
                 options: {
                   title: {
                     display: true,
-                    text: 'Corona Virus spread infected and death'
+                    text: 'COVID Spread- Infected and dead'
                   },
                   legend: {
                     display: true
+                  },
+                  scales: {
+                   xAxes: [{
+
+                //     gridThickness:5,
+                //      gridLines: {
+                //        display: false,
+                //        color: "#808080"
+                //      },
+                      scaleLabel: {
+                        display: true,
+                        labelString: "Weeks of the year 2020",
+                        fontColor: "black"
+                      }
+                    }],
+                    yAxes: [{
+                  //    gridLines: {
+                  //      color: "#808080",
+                  //      borderDash: [1, 8],
+                  //    },
+                      scaleLabel: {
+                        display: true,
+                        labelString: "No: of Cases",
+                        fontColor: "black"
+                      }
+                    }]
                   }
                 }
               }
@@ -392,7 +453,7 @@
       </div>
 
       <div class="col-sm-4">
-         
+
         <div class="img-responsive" style="width:100% height=50%" alt="Image">
           <canvas id="bar-chart-grouped" width="800" height="500"></canvas>
           <script>
@@ -461,18 +522,38 @@
                   labels: label,
                   datasets: [{
                     label: "Male",
-                    backgroundColor: "#3e95cd",
+                    backgroundColor: "#17becf",
                     data: datas
                   }, {
                     label: "Female",
-                    backgroundColor: "#8e5ea2",
+                    backgroundColor: "#fb8072",
                     data: death_datas
                   }]
                 },
                 options: {
                   title: {
                     display: true,
-                    text: 'Corona Spread gender & age wise'
+                    text: 'COVID Spread- Total Cases:Gender & Age wise'
+                  },
+                  scales: {
+                    xAxes: [{
+                    zeroLineColor: '#FFFFFF',
+
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Age Groups",
+                        fontColor: "black"
+                      }
+                    }],
+                    yAxes: [{
+                    zeroLineColor: '#FFFFFF',
+
+                      scaleLabel: {
+                        display: true,
+                        labelString: "No: of Cases",
+                        fontColor: "black"
+                      }
+                    }]
                   }
                 }
               }
@@ -531,10 +612,10 @@
               var config = {
                 type: 'bar',
                 data: {
-                  labels: ["Domestic", "Internation Travel", "Unknown"],
+                  labels: ["Domestic", "International Travel", "Unknown"],
                   datasets: [{
                     label: "Transmission",
-                    backgroundColor: ["#8e5ea2", "#8e5ea2", "#8e5ea2"],
+                    backgroundColor: ["#8c96c6", "#8c96c6", "#8c96c6"],
                     data: datas
                   }]
                 },
@@ -544,7 +625,20 @@
                   },
                   title: {
                     display: true,
-                    text: 'Corona Virus Transmission'
+                    text: 'COVID Spread through Transmission'
+                  },
+                  scales: {
+                    yAxes: [{
+                  //    gridLines: {
+                  //      color: "#808080",
+                  //      borderDash: [1, 8],
+                  //    },
+                      scaleLabel: {
+                        display: true,
+                        labelString: "No: of Cases",
+                        fontColor: "black"
+                      }
+                    }]
                   }
                 }
               }
@@ -595,8 +689,43 @@
             }
 
             function loadHospitalData(responseData) {
+          //    label = responseData["icu"].map(function(d) {
+        //        return d.onsetweekofsym;
+          //    })
               label = responseData["icu"].map(function(d) {
-                return d.onsetweekofsym;
+                if (d.onsetweekofsym == 8) {
+                  return "Feb 23";
+                } else if (d.onsetweekofsym == 9) {
+                  return "Mar 01";
+                } else if (d.onsetweekofsym == 10) {
+                  return "Mar 08";
+                } else if (d.onsetweekofsym == 11) {
+                  return "Mar 15";
+                } else if (d.onsetweekofsym == 12) {
+                  return "Mar 22";
+                } else if (d.onsetweekofsym == 13) {
+                  return "Mar 29";
+                } else if (d.onsetweekofsym == 14) {
+                  return "Apr 05"
+                } else if (d.onsetweekofsym == 15) {
+                  return "Apr 12";
+                }else if (d.onsetweekofsym == 16) {
+                  return "Apr 19";
+                }else if (d.onsetweekofsym == 17) {
+                  return "Apr 26";
+                }else if (d.onsetweekofsym == 18) {
+                  return "May 03";
+                }else if (d.onsetweekofsym == 19) {
+                  return "May 10";
+                }else if (d.onsetweekofsym == 20) {
+                  return "May 17";
+                }else if (d.onsetweekofsym == 21) {
+                  return "May 24";
+                }else if (d.onsetweekofsym == 22) {
+                  return "May 31";
+                }else if (d.onsetweekofsym == 99) {
+                  return "Unknown";
+                }
               })
               datas = responseData["icu"].map(function(d) {
                 return d.count;
@@ -617,19 +746,19 @@
                   datasets: [{
                     label: "ICU",
                     type: "line",
-                    borderColor: "#8e5ea2",
+                    borderColor: "#ff7f0e",
                     data: datas,
                     fill: false
                   }, {
                     label: "Hospitalized ",
                     type: "line",
-                    borderColor: "#3e95cd",
+                    borderColor: "#bcbd22",
                     data: hospital_datas,
                     fill: false
                   }, {
                     label: "Not Hospitalized ",
                     type: "line",
-                    borderColor: "#3e12cd",
+                    borderColor: "#17becf",
                     data: notHospital_datas,
                     fill: false
                   }],
@@ -637,10 +766,30 @@
                 options: {
                   title: {
                     display: true,
-                    text: 'Corona Virus spread infected and death'
+                    text: 'COVID- Stages of Medication'
                   },
                   legend: {
                     display: true
+                  },
+                  scales: {
+                    xAxes: [{
+                      scaleLabel: {
+                        display: true,
+                        labelString: "Weeks of the year 2020",
+                        fontColor: "black"
+                      }
+                    }],
+                    yAxes: [{
+                  //    gridLines: {
+                  //      color: "#808080",
+                  //      borderDash: [1, 8],
+                  //    },
+                      scaleLabel: {
+                        display: true,
+                        labelString: "No: of Cases",
+                        fontColor: "black"
+                      }
+                    }]
                   }
                 }
               }
@@ -650,10 +799,10 @@
         </div>
       </div>
       <div class="col-sm-4">
-         
+
         <div id="" class="img-responsive" style="width:100% height=100%" alt="Image">
           <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
-          <canvas id="bar-chart-horizontal" width="800" height="390"></canvas>
+          <canvas id="bar-chart-horizontal" width="800" height="450"></canvas>
           <script>
             $(document).ready(function() {
               $.ajax({
@@ -696,8 +845,8 @@
                 data: {
                   labels: ["Health care worker", "School/daycare worker", "Longterm care resident", "Other"],
                   datasets: [{
-                    label: "Population",
-                    backgroundColor: ["#3e95cd", "#3e95cd", "#3e95cd", "#3e95cd", "#3e95cd"],
+                    label: "Occupation",
+                    backgroundColor: ["#74c476", "#74c476", "#74c476", "#74c476", "#74c476"],
                     data: dataOccupation
                   }]
                 },
@@ -707,7 +856,20 @@
                   },
                   title: {
                     display: true,
-                    text: 'Occupation of Patients '
+                    text: 'COVIDSpread - Occupation of Patients '
+                  },
+                  scales: {
+                    xAxes: [{
+                  //    gridLines: {
+                  //      color: "#808080",
+                  //      borderDash: [1, 8],
+                  //    },
+                      scaleLabel: {
+                        display: true,
+                        labelString: "No: of Cases",
+                        fontColor: "black"
+                      }
+                    }]
                   }
                 }
               }
