@@ -1,7 +1,7 @@
 # corona_virus_spread_canada_dashboard
 Dashboard to visualize the spread of Covid-19 during February to May of 2020.
 
-##Installation
+## Installation
 Install [xampp](https://www.apachefriends.org/download.html) software.
 
 
