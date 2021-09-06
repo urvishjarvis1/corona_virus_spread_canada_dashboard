@@ -1,4 +1,4 @@
-# corona_virus_spread_canada_dashboard
+# Corona Virus (COVID-19) Spread Canada Dashboard
 Dashboard to visualize the spread of Covid-19 during February to May of 2020.
 
 ## Installation
